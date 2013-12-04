@@ -5,46 +5,33 @@
 		.wrapper {
 			margin: 0 auto;
 			max-width: 600px;
-			overflow: hidden;
 		}
 
-		.even {
-			background-color: #f99;
-			border: 1px solid #000;
-			float: left;
-			box-sizing: border-box;
-			padding: 20px;
-			width: 50%;
+		img {
+			max-width: 100%;
+		}
+
+		.expand-box {
+			background-color: #fee;
+		}
+
+		.expandable {
+			transition: height 0.25s linear;
+			overflow: hidden;
 		}
 	</style>
 	<script type="text/javascript" src="/requirejs/require.js" data-main="main.js"></script>
 </head>
 <body>
 	<div class="wrapper">
-		<div class="even">
+		<div class="expand-box">
 			<h2>Alot of content</h2>
-			<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-			tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-			quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-			consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
-			cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
-			proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-		</div>
-		<div class="even">
-			<h2>Much less content</h2>
-			<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-			tempor incididunt ut labore et dolore magna aliqua.</p>
-		</div>
-	</div>
-	<div class="wrapper">
-		<div class="even" data-even-group="secondRow">
-			<h2>Little content in new row</h2>
-			<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</p>
-		</div>
-		<div class="even" data-even-group="secondRow">
-			<h2>This is grouped with previous container</h2>
-			<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-			tempor incididunt ut labore et dolore magna aliqua.</p>
+			<button class="toggle-visibility">Toggle</button>
+			<div class="expandable expanded">
+				<div class="inner">
+					<img src="http://www.catster.com/files/original.jpg">
+				</div>
+			</div>
 		</div>
 	</div>
 </body>

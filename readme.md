@@ -1,5 +1,5 @@
 # Expandables JS
-To expand boxes by changing their height. Works with CSS-transforms and nested expandboxes.
+To expand boxes by changing their height. Works with CSS-transforms and nested expandboxes. I use this for expandable navigation (the one where you click an hamburger to see the menu) and expandable content boxes.
 
 ## Usage
 The module expects a couple of classes to be used on every expand box. The wrapper <code>.expand-box</code> wich will normally wrap even the toggle button. The <code>.expandable</code> wich is the element that will have it´s height set. The <code>.inner</code> wich needs to be just below <code>.expandable</code> to give the correct height. The <code>.toggle-visibility</code> on the element that is used to expand/contract.
@@ -32,6 +32,8 @@ require(['expandables'], function( expandables ){
 	});
 });
 </pre>
+
+All elements except <code>.inner</code> will get the <code>.expanded</code> class for convinience. You can have a box expanded on load by setting <code>.expanded</code> to the <code>.expandable</code> element. Otherwise just set <code>height: 0;</code> to the <code>.expandable</code> in your CSS and it will be contracted on load.
 
 ### Nesting expandable items
 If you want an expandable box inside another the parent will not be transitioned when contracting. This is because the parent box will need to have flexilbe height (<code>height: auto;</code>) in order for the nested boxes to be transitioned. When an element has a height transition and is set from fixed height to the initial value 'auto' it will transition to <code>height: 0;</code> THEN get the correct height.
