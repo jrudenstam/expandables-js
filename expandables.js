@@ -16,6 +16,7 @@
 		ctx["expandables"] = definition;
 	}
 })(function( helper ){
+	helper = helper || window.helper; // Get the helper if not using AMD
 	var expandables = {
 		defaults: {
 			wrapperClass: 'expand-box',
