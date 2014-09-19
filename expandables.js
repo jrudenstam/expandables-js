@@ -11,7 +11,7 @@
 	"use strict";
 
 	if (typeof define === "function") {
-		define(['/helper-js/helper.js'], definition);
+		define(['vendor/helper'], definition);
 	} else {
 		ctx["expandables"] = definition;
 	}
@@ -68,11 +68,11 @@
 			};
 		},
 
-		clickHandler: function( event ){
+		clickHandler: function( event, self ){
 			event.stop();
-			this.setHeight(event.target);
-			if (this.settings.callback) {
-				this.settings.callback(event, wrapper, this.setHeight);
+			self.setHeight(event.target);
+			if (self.settings.callback) {
+				self.settings.callback(event, wrapper, self.setHeight);
 			}
 		},
 
