@@ -11,7 +11,7 @@
 	"use strict";
 
 	if (typeof define === "function") {
-		define(['vendor/helper'], definition);
+		define(['../helper-js/helper'], definition);
 	} else {
 		ctx["expandables"] = definition;
 	}
