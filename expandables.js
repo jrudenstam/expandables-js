@@ -1,10 +1,10 @@
 /*
- * Expandables JS v0.1
+ * Expandables JS
  * Simple vanilla JS to toggle visibility
  * of boxes by adjusting thier height
  *
- * Author: jrudenstam
- * http://typisktmig.se
+ * @author jrudenstam
+ * @version 0.2
  */
 
 (function(definition, ctx){
@@ -25,7 +25,9 @@
 			btnClass: 'toggle-visibility',
 			expandedClass: 'expanded',
 			closeTextAttr: 'data-close-text',
-			closeBtnClass: 'close-btn'
+			dataTargetAttr: 'data-target',
+			closeBtnClass: 'close-btn',
+			openOne: true
 		},
 
 		btns: [],
@@ -40,9 +42,20 @@
 				}
 			}
 
+			// We need at least inner, outer, wrapper and btn elements
+			var hasRequiredElemnets = helper.getByClass(this.settings.btnClass, document, true) && 
+			helper.getByClass(this.settings.wrapperClass, document, true) && 
+			helper.getByClass(this.settings.outerClass, document, true) && 
+			helper.getByClass(this.settings.innerClass, document, true) ? true : false;
+			
+			if ( !hasRequiredElemnets ) {
+				return;
+			}
+
 			// Get all btns
 			this.btns = helper.getByClass(this.settings.btnClass, document, false);
 
+			// Start things up
 			this.bindUiEvents();
 			this.heightMeUpBeforeYouGoGo();
 		},
@@ -56,7 +69,7 @@
 		},
 
 		heightMeUpBeforeYouGoGo: function(){
-			// Since you can´t animate with height auto
+			// Since you can´t animate with height auto set height value if expanded onLoad
 			var outers = helper.getByClass(this.settings.outerClass, document);
 
 			for (var i = outers.length - 1; i >= 0; i--) {
@@ -70,88 +83,80 @@
 
 		clickHandler: function( event, self ){
 			event.stop();
-			self.setHeight(event.target);
-			if (self.settings.callback) {
-				self.settings.callback(event, wrapper, self.setHeight);
+
+			// Get all the elements needed to expand/contract
+			var btn = self.closestByClass(this, self.settings.btnClass),
+			dataTargetWrapper = helper.getByClass(helper.getAttribute(btn, self.settings.dataTargetAttr), document, true),
+			wrapper = dataTargetWrapper || self.closestByClass(btn, self.settings.wrapperClass),
+			outer = helper.getByClass(self.settings.outerClass, wrapper, true),
+			parentWrapper = self.closestByClass(wrapper.parentNode, self.settings.wrapperClass);
+
+			// We will need to see if current wrapper is initiated by dataTargetAttr
+			wrapper.usingDataTarget = dataTargetWrapper ? true : false;
+			wrapper.dataTarget = helper.getAttribute(btn, self.settings.dataTargetAttr);
+
+			// Close all open elems by triggering click on the btns
+			if ( self.settings.openOne ) {
+				for (var i = self.btns.length - 1; i >= 0; i--) {
+					if ( helper.hasClass(self.btns[i], self.settings.expandedClass) && self.btns[i] !== btn ) {
+						self.btns[i].click();
+					}
+				};
+			}
+
+			// If close button just close otherwise toggle
+			if ( helper.hasClass(btn, self.settings.closeBtnClass) ) {
+				self.close( btn, outer, wrapper );
+			} else {
+				self.toggle( btn, outer, wrapper );
 			}
 		},
 
-		setHeight: function( btn, safeHeight ) {
-			// To get wrapper we traverse up until match with wrapper class is found
-			// as a fallback we take the closest parent to button unless 'data-target' is set
-			var btn = helper.up(btn, function(node){
-				if (helper.hasClass(node, this.settings.btnClass)) {
+		closestByClass: function( fromElem, targetClass ) {
+			// Less clutter wrapper for helper.up()
+			return helper.up(fromElem, function(node){
+				if (helper.hasClass(node, targetClass)) {
 					return true;
 				}
-			},this),
-			usingDataTarget = helper.getByClass(helper.getAttribute(btn, 'data-target'), document, true) ? true : false;
-			wrapper = usingDataTarget ? helper.getByClass(helper.getAttribute(btn, 'data-target'), document, true) : helper.up(btn, function(node){
-				if (helper.hasClass(node, this.settings.wrapperClass)) {
-					return true;
-				}
-			}, this),
-			outer = helper.getByClass(this.settings.outerClass, wrapper, true),
-			inner = helper.getByClass(this.settings.innerClass, wrapper, true),
-			parentBox = helper.up(wrapper.parentNode, function(node){
-				if (helper.hasClass(node, this.settings.wrapperClass)) {
-					return true;
-				}
-			}, this);
+			},this );
+		},
 
-			// We will need to see if current wrapper is initiated by 'data-target'
-			wrapper.usingDataTarget = usingDataTarget;
-			wrapper.dataTarget = helper.getAttribute(btn, 'data-target');
+		open: function( btn, outer, wrapper ) {
+			// Get height by inner elem
+			var inner = helper.getByClass(this.settings.innerClass, wrapper, true);
 
-			if (safeHeight) {
-				outer.style.transition = 'none';
-				outer.style.height = 'auto';
-			} else if (outer.style.height === 'auto') {
-				outer.style.removeProperty('transition');
-				outer.style.removeProperty('height');
+			outer.style.height = inner.clientHeight + 'px';
+			helper.addClass(outer, this.settings.expandedClass);
+			helper.addClass(btn, this.settings.expandedClass);
+			helper.addClass(wrapper, this.settings.expandedClass);
+
+			if (helper.getAttribute(btn, this.settings.closeTextAttr)) {
+				// Save text from DOM in property
+				if (!wrapper.initialBtnText) {
+					wrapper.initialBtnText = btn.innerHTML;
+				}
+				btn.innerHTML = helper.getAttribute(btn, this.settings.closeTextAttr);
 			}
+		},
 
-			if (!safeHeight) {
-				// If expanded or close btn
-				if (helper.hasClass(outer, this.settings.expandedClass) || helper.hasClass(btn, this.settings.closeBtnClass)) {
-					outer.style.height = 0;
-					helper.removeClass(outer, this.settings.expandedClass);
-					helper.removeClass(btn, this.settings.expandedClass);
-					helper.removeClass(wrapper, this.settings.expandedClass);
+		close: function( btn, outer, wrapper ) {
+			outer.style.height = 0;
+			helper.removeClass(outer, this.settings.expandedClass);
+			helper.removeClass(btn, this.settings.expandedClass);
+			helper.removeClass(wrapper, this.settings.expandedClass);
 
-					if (wrapper.initialBtnText && helper.getAttribute(btn, this.settings.closeTextAttr)) {
-						btn.innerHTML = wrapper.initialBtnText;
-					}
+			if (wrapper.initialBtnText && helper.getAttribute(btn, this.settings.closeTextAttr)) {
+				btn.innerHTML = wrapper.initialBtnText;
+			}
+		},
 
-				} else {
-					var height = inner.clientHeight;
-					outer.style.height = height + 'px';
-					helper.addClass(outer, this.settings.expandedClass);
-					helper.addClass(btn, this.settings.expandedClass);
-					helper.addClass(wrapper, this.settings.expandedClass);
+		toggle: function( btn, outer, wrapper ) {
+			// If expanded
+			if ( helper.hasClass(wrapper, this.settings.expandedClass) ) {
+				this.close( btn, outer, wrapper );
 
-					if (helper.getAttribute(btn, this.settings.closeTextAttr)) {
-						if (!wrapper.initialBtnText) {
-							wrapper.initialBtnText = btn.innerHTML;
-						}
-						btn.innerHTML = helper.getAttribute(btn, this.settings.closeTextAttr);
-					}
-				}
-
-				if (parentBox) {
-					// Pass parent box button to this function
-					if (parentBox.usingDataTarget) {
-						var allBtnsWithTargetAttr = helper.getByAttr('data-target', document),
-						parentBtn = allBtnsWithTargetAttr[0];
-
-						for (var i = allBtnsWithTargetAttr.length - 1; i >= 0; i--) {
-							if (helper.getAttribute(allBtnsWithTargetAttr[i], 'data-target') === parentBox.dataTarget) {
-								parentBtn = allBtnsWithTargetAttr[i];
-							}
-						};
-					}
-
-					this.setHeight(parentBtn, true);
-				}
+			} else {
+				this.open( btn, outer, wrapper );
 			}
 		}
 	};
